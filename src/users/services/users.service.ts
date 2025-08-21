@@ -5,18 +5,24 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { UpdateUserDto } from '../dtos/update-user.dto';
 import { User } from '../entities/user.entity';
+import { UserMapper } from '../mappers/mapper-user';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
     private readonly hashingService: HashingServiceProtocol,
+    private readonly userMapper: UserMapper,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const user = this.usersRepository.create(createUserDto);
+    const user = this.userMapper.toEntity(createUserDto);
     user.password = await this.hashingService.hash(createUserDto.password);
-    return this.usersRepository.save(user);
+
+    this.usersRepository.create(user);
+    await this.usersRepository.save(user);
+
+    return this.userMapper.toResponse(user);
   }
 
   findAll() {
