@@ -30,7 +30,7 @@ export class UsersService {
   }
 
   findOne(id: string) {
-    return this.usersRepository.findOne({ where: { id } });
+    return this.usersRepository.findOneBy({ id });
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {
