@@ -1,3 +1,4 @@
+import { Role } from 'src/auth/enums/roles';
 import {
   Column,
   CreateDateColumn,
@@ -25,4 +26,12 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: string;
+
+  @Column({
+    type: 'enum',
+    enum: Role,
+    array: true,
+    default: [Role.USER],
+  })
+  roles: Role[];
 }

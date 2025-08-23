@@ -7,7 +7,7 @@ export const typeOrmConfig = (config: ConfigService): TypeOrmModuleOptions => ({
   port: config.get<number>('DATABASE_PORT'),
   username: config.get<string>('DATABASE_USERNAME'),
   password: config.get<string>('DATABASE_PASSWORD'),
-  database: config.get<string>('DATABASE_NAME'),
+  database: config.get<string>('DATABASE_DATABASE'),
   synchronize: config.get<boolean>('DATABASE_SYNCHRONIZE'),
-  autoLoadEntities: config.get<boolean>('DATABASE_AUTO_LOAD_ENTITIES'),
+  autoLoadEntities: config.get<boolean>('DATABASE_AUTOLOADENTITIES'),
 });

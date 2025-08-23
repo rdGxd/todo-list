@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { PayloadDto } from 'src/auth/dto/payload.dto';
 import { HashingServiceProtocol } from 'src/auth/hashing/hashing.service';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dtos/create-user.dto';
@@ -25,11 +26,13 @@ export class UsersService {
     return this.userMapper.toResponse(user);
   }
 
-  findAll() {
-    return this.usersRepository.find();
+  async findAll() {
+    const allUsers = await this.usersRepository.find();
+
+    return allUsers.map((user: User) => this.userMapper.toResponse(user));
   }
 
-  findOne(id: string) {
+  findOne(id: string, payload: PayloadDto) {
     return this.usersRepository.findOneBy({ id });
   }
 

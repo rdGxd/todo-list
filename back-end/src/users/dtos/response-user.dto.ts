@@ -1,4 +1,5 @@
 import { Expose } from 'class-transformer';
+import { Role } from 'src/auth/enums/roles';
 
 export class ResponseUserDto {
   @Expose()
@@ -11,4 +12,7 @@ export class ResponseUserDto {
   createdAt: string;
   @Expose()
   updatedAt: string;
+
+  @Expose()
+  roles: Role[];
 }

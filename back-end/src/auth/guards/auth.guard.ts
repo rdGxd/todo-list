@@ -1,31 +1,42 @@
 import {
   CanActivate,
   ExecutionContext,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import type { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Request } from 'express';
-import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { User } from 'src/users/entities/user.entity';
+import { Repository } from 'typeorm';
+import jwtConfig from '../config/jwt.config';
+import { REQUEST_TOKEN_PAYLOAD_KEY } from '../constants/auth.constants';
 
+/**
+ * Guard responsável por validar o token JWT e garantir que o usuário está autenticado.
+ * Adiciona o payload do token (com roles) ao request para uso em outros guards.
+ */
 @Injectable()
 export class AuthGuard implements CanActivate {
+  /**
+   * @param userRepository Repositório de usuários para buscar dados do usuário autenticado
+   * @param jwtService Serviço para validação do JWT
+   * @param jwtConfiguration Configuração do JWT
+   */
   constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
-    private readonly reflector: Reflector,
+    @Inject(jwtConfig.KEY)
+    private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
   ) {}
 
-  canActivate(context: ExecutionContext): boolean {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-
-    if (isPublic) {
-      return true;
-    }
-
+  /**
+   * Valida o token JWT, busca o usuário e adiciona o payload ao request.
+   */
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
 
@@ -34,18 +45,30 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      const payload = this.jwtService.verify(token, {
-        secret: process.env.JWT_SECRET,
-      });
-      request['user'] = payload;
+      const payload = await this.jwtService.verify(
+        token,
+        this.jwtConfiguration,
+      );
+
+      const user = await this.userRepository.findOneBy({ id: payload.sub });
+
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      // Adiciona os roles do usuário ao payload e ao request
+      payload['roles'] = user.roles;
+      request[REQUEST_TOKEN_PAYLOAD_KEY] = payload;
     } catch {
       throw new UnauthorizedException();
     }
     return true;
   }
 
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+  /**
+   * Extrai o token JWT do header Authorization.
+   */
+  private extractTokenFromHeader(request: Request) {
+    return request.headers.authorization?.split(' ')[1] || undefined;
   }
 }

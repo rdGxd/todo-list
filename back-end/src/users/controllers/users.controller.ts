@@ -6,7 +6,13 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
+import { SetRoutePolicy } from 'src/auth/decorators/set-route-policy.decorator';
+import { PayloadDto } from 'src/auth/dto/payload.dto';
+import { Role } from 'src/auth/enums/roles';
+import { AuthAndPolicyGuard } from 'src/auth/guards/auth-and-policy.guard';
+import { TokenPayloadParam } from 'src/auth/params/token-payload.param';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { UpdateUserDto } from '../dtos/update-user.dto';
 import { UsersService } from '../services/users.service';
@@ -21,13 +27,15 @@ export class UsersController {
   }
 
   @Get()
+  @UseGuards(AuthAndPolicyGuard)
+  @SetRoutePolicy(Role.USER)
   findAll() {
     return this.usersService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  findOne(@Param('id') id: string, @TokenPayloadParam() payload: PayloadDto) {
+    return this.usersService.findOne(id, payload);
   }
 
   @Patch(':id')
