@@ -1,5 +1,5 @@
 import { IsEmail, IsEnum, IsNumber, IsString } from 'class-validator';
-import { Role } from '../enums/roles';
+import { Roles } from '../enums/roles';
 
 /**
  * Representa o payload do JWT, contendo informações do usuário e metadados do token.
@@ -20,8 +20,8 @@ export class PayloadDto {
   /**
    * Cargos (roles) do usuário.
    */
-  @IsEnum(Role, { each: true })
-  roles: Role[];
+  @IsEnum(Roles, { each: true })
+  roles: Roles[];
 
   /**
    * Data de emissão do token (timestamp).

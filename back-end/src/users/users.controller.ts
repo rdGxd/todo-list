@@ -10,12 +10,12 @@ import {
 } from '@nestjs/common';
 import { SetRoutePolicy } from 'src/auth/decorators/set-route-policy.decorator';
 import { PayloadDto } from 'src/auth/dto/payload.dto';
-import { Role } from 'src/auth/enums/roles';
+import { Roles } from 'src/auth/enums/roles';
 import { AuthAndPolicyGuard } from 'src/auth/guards/auth-and-policy.guard';
 import { TokenPayloadParam } from 'src/auth/params/token-payload.param';
-import { CreateUserDto } from '../dtos/create-user.dto';
-import { UpdateUserDto } from '../dtos/update-user.dto';
-import { UsersService } from '../services/users.service';
+import { CreateUserDto } from './dtos/create-user.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
+import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
@@ -28,7 +28,7 @@ export class UsersController {
 
   @Get()
   @UseGuards(AuthAndPolicyGuard)
-  @SetRoutePolicy(Role.USER)
+  @SetRoutePolicy(Roles.USER)
   findAll() {
     return this.usersService.findAll();
   }

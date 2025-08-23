@@ -8,7 +8,7 @@ import {
   IsString,
   Length,
 } from 'class-validator';
-import { Role } from 'src/auth/enums/roles';
+import { Roles } from 'src/auth/enums/roles';
 
 export class CreateUserDto {
   @IsEmail()
@@ -21,9 +21,9 @@ export class CreateUserDto {
 
   @IsArray()
   @ArrayNotEmpty()
-  @IsEnum(Role, { each: true })
+  @IsEnum(Roles, { each: true })
   @IsOptional()
-  roles?: Role[];
+  roles?: Roles[];
 
   @IsString()
   @Length(6, 20)

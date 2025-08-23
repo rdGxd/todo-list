@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Role } from 'src/auth/enums/roles';
+import { Roles } from 'src/auth/enums/roles';
 import { REQUEST_TOKEN_PAYLOAD_KEY } from '../constants/auth.constants';
 import { ROUTE_POLICY_KEY } from '../constants/route.constants';
 
@@ -25,7 +25,7 @@ export class RolesGuard implements CanActivate {
    * Lança UnauthorizedException se não possuir permissão.
    */
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.get<Role | Role[]>(
+    const requiredRoles = this.reflector.get<Roles | Roles[]>(
       ROUTE_POLICY_KEY,
       context.getHandler(),
     );
@@ -41,9 +41,9 @@ export class RolesGuard implements CanActivate {
     }
 
     // Extrai os roles do payload e verifica permissão
-    const { roles }: { roles: Role[] } = tokenPayload,
+    const { roles }: { roles: Roles[] } = tokenPayload,
       userRoles = roles ?? [],
-      Roles = ([] as Role[]).concat(requiredRoles);
+      Roles = ([] as Roles[]).concat(requiredRoles);
     const hasPermission = Roles.some((p) => userRoles.includes(p));
 
     if (!hasPermission) {

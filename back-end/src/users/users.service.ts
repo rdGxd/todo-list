@@ -3,10 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { PayloadDto } from 'src/auth/dto/payload.dto';
 import { HashingServiceProtocol } from 'src/auth/hashing/hashing.service';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from '../dtos/create-user.dto';
-import { UpdateUserDto } from '../dtos/update-user.dto';
-import { User } from '../entities/user.entity';
-import { UserMapper } from '../mappers/mapper-user';
+import { CreateUserDto } from './dtos/create-user.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
+import { User } from './entities/user.entity';
+import { UserMapper } from './mappers/mapper-user';
 
 @Injectable()
 export class UsersService {

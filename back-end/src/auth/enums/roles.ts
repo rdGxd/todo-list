@@ -1,7 +1,7 @@
 /**
  * Enumeração dos cargos/roles possíveis do sistema.
  */
-export enum Role {
+export enum Roles {
   USER = 'user',
   ADMIN = 'admin',
 }
