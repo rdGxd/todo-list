@@ -28,19 +28,53 @@ export class UsersService {
 
   async findAll() {
     const allUsers = await this.usersRepository.find();
-
     return allUsers.map((user: User) => this.userMapper.toResponse(user));
   }
 
-  findOne(id: string, payload: PayloadDto) {
-    return this.usersRepository.findOneBy({ id });
+  async findOne(id: string, payload: PayloadDto) {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (user?.id !== payload.sub) {
+      throw new Error('You can only access your own user data');
+    }
+    return this.userMapper.toResponse(user);
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    return this.usersRepository.update(id, updateUserDto);
+  async update(id: string, updateUserDto: UpdateUserDto, payload: PayloadDto) {
+    if (id !== payload.sub) {
+      throw new Error('You can only update your own user data');
+    }
+
+    const { password, ...dtoWithoutPassword } = updateUserDto;
+
+    const user = await this.usersRepository.preload({
+      id,
+      ...dtoWithoutPassword,
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (password) {
+      user.password = await this.hashingService.hash(password);
+    }
+
+    await this.usersRepository.save(user);
+    return this.userMapper.toResponse(user);
   }
 
-  remove(id: string) {
-    return this.usersRepository.delete(id);
+  async remove(id: string, payload: PayloadDto) {
+    const user = await this.usersRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (user.id !== payload.sub) {
+      throw new Error('You can only access your own user data');
+    }
+
+    await this.usersRepository.delete(id);
+    return this.userMapper.toResponse(user);
   }
 }
