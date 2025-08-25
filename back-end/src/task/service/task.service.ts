@@ -29,7 +29,7 @@ export class TaskService {
     await this.taskRepository.save(task);
     await this.userRepository.save(user);
 
-    return this.taskMapper.toDto(task);
+    return this.taskMapper.toResponse(task);
   }
 
   async findAll(payload: PayloadDto) {
@@ -42,7 +42,7 @@ export class TaskService {
       where: { user },
       relations: ['user', 'user.tasks'],
     });
-    return tasks.map((task) => this.taskMapper.toDto(task));
+    return tasks.map((task) => this.taskMapper.toResponse(task));
   }
 
   async findOne(id: string, payload: PayloadDto) {
@@ -58,7 +58,7 @@ export class TaskService {
     if (!task) {
       throw new Error('Task not found');
     }
-    return this.taskMapper.toDto(task);
+    return this.taskMapper.toResponse(task);
   }
 
   async update(id: string, updateTaskDto: UpdateTaskDto, payload: PayloadDto) {
@@ -84,7 +84,7 @@ export class TaskService {
     });
 
     await this.taskRepository.save(task);
-    return this.taskMapper.toDto(task);
+    return this.taskMapper.toResponse(task);
   }
 
   async remove(id: string, payload: PayloadDto) {
@@ -102,7 +102,7 @@ export class TaskService {
     }
 
     await this.taskRepository.remove(task);
-    return this.taskMapper.toDto(task);
+    return this.taskMapper.toResponse(task);
   }
 
   async findTasksForStatus(status: taskStatus, payload: PayloadDto) {
@@ -115,6 +115,6 @@ export class TaskService {
       where: { user, status },
       relations: ['user', 'user.tasks'],
     });
-    return tasks.map((task) => this.taskMapper.toDto(task));
+    return tasks.map((task) => this.taskMapper.toResponse(task));
   }
 }

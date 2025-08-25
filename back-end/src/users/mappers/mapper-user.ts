@@ -10,7 +10,6 @@ export class UserMapper {
   constructor(private readonly taskMapper: TaskMapper) {}
 
   toResponse(user: User): ResponseUserDto {
-    console.log(user.tasks);
     const response = new ResponseUserDto();
     response.id = user.id;
     response.email = user.email;
@@ -18,7 +17,7 @@ export class UserMapper {
     response.createdAt = user.createdAt;
     response.updatedAt = user.updatedAt;
     response.roles = user.roles;
-    response.tasks = user.tasks.map((task) => this.taskMapper.toDto(task));
+    response.tasks = user.tasks.map((task) => this.taskMapper.toResponse(task));
     return response;
   }
 
