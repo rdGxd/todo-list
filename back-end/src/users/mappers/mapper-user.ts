@@ -18,7 +18,7 @@ export class UserMapper {
     response.createdAt = user.createdAt;
     response.updatedAt = user.updatedAt;
     response.roles = user.roles;
-    response.tasks = user.tasks.map((task) => this.taskMapper.toResponseDto(task));
+    response.tasks = user.tasks.map((task) => this.taskMapper.toDto(task));
     return response;
   }
 

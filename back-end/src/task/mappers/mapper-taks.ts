@@ -6,7 +6,7 @@ import { Task } from '../entities/task.entity';
 
 @Injectable()
 export class TaskMapper {
-  toResponseDto(entity: Task): ResponseTaskDto {
+  toDto(entity: Task): ResponseTaskDto {
     const response = new ResponseTaskDto();
     response.taskId = entity.id;
     response.title = entity.title;
