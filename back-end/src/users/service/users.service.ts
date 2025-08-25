@@ -83,20 +83,22 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto, payload: PayloadDto) {
-    if (id !== payload.sub) {
+    const user = await this.usersRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (user.id !== payload.sub) {
       throw new Error('You can only update your own user data');
     }
 
     const { password, ...dtoWithoutPassword } = updateUserDto;
 
-    const user = await this.usersRepository.preload({
+    await this.usersRepository.preload({
       id,
       ...dtoWithoutPassword,
     });
-
-    if (!user) {
-      throw new Error('User not found');
-    }
 
     if (password) {
       user.password = await this.hashingService.hash(password);
