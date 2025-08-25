@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { CreateTaskDto } from '../dto/create-task.dto';
 import { UpdateTaskDto } from '../dto/update-task.dto';
 import { Task } from '../entities/task.entity';
+import { taskStatus } from '../enums/taskStatus';
 import { TaskMapper } from '../mappers/mapper-taks';
 
 @Injectable()
@@ -102,5 +103,18 @@ export class TaskService {
 
     await this.taskRepository.remove(task);
     return this.taskMapper.toResponseDto(task);
+  }
+
+  async findTasksForStatus(status: taskStatus, payload: PayloadDto) {
+    const user = await this.userRepository.findOneBy({ id: payload.sub });
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const tasks = await this.taskRepository.find({
+      where: { user, status },
+      relations: ['user', 'user.tasks'],
+    });
+    return tasks.map((task) => this.taskMapper.toResponseDto(task));
   }
 }

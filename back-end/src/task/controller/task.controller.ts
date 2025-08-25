@@ -15,6 +15,7 @@ import { AuthAndPolicyGuard } from 'src/auth/guards/auth-and-policy.guard';
 import { TokenPayloadParam } from 'src/auth/params/token-payload.param';
 import { CreateTaskDto } from '../dto/create-task.dto';
 import { UpdateTaskDto } from '../dto/update-task.dto';
+import { taskStatus } from '../enums/taskStatus';
 import { TaskService } from '../service/task.service';
 
 @UseGuards(AuthAndPolicyGuard)
@@ -41,8 +42,20 @@ export class TaskController {
     return this.taskService.findOne(id, payload);
   }
 
+  @Get('status/:status')
+  findTasksForStatus(
+    @Param('status') status: taskStatus,
+    @TokenPayloadParam() payload: PayloadDto,
+  ) {
+    return this.taskService.findTasksForStatus(status, payload);
+  }
+
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto, @TokenPayloadParam() payload: PayloadDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateTaskDto: UpdateTaskDto,
+    @TokenPayloadParam() payload: PayloadDto,
+  ) {
     return this.taskService.update(id, updateTaskDto, payload);
   }
 
