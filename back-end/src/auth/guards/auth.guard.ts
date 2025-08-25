@@ -37,7 +37,7 @@ export class AuthGuard implements CanActivate {
    * Valida o token JWT, busca o usuário e adiciona o payload ao request.
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request: Request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {

@@ -1,8 +1,10 @@
 import { Roles } from 'src/auth/enums/roles';
+import { Task } from 'src/task/entities/task.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -34,4 +36,10 @@ export class User {
     default: [Roles.USER],
   })
   roles: Roles[];
+
+  @OneToMany(() => Task, (task) => task.user, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
+  tasks: Task[];
 }

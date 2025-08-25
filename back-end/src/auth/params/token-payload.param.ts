@@ -1,5 +1,4 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { Request } from 'express';
 import { REQUEST_TOKEN_PAYLOAD_KEY } from '../constants/auth.constants';
 
 /**

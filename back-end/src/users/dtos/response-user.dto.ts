@@ -1,5 +1,6 @@
 import { Expose } from 'class-transformer';
 import { Roles } from 'src/auth/enums/roles';
+import { ResponseTaskDto } from 'src/task/dto/response-task.dto';
 
 export class ResponseUserDto {
   @Expose()
@@ -15,4 +16,7 @@ export class ResponseUserDto {
 
   @Expose()
   roles: Roles[];
+
+  @Expose()
+  tasks: ResponseTaskDto[];
 }

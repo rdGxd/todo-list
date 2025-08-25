@@ -13,9 +13,9 @@ import { PayloadDto } from 'src/auth/dto/payload.dto';
 import { Roles } from 'src/auth/enums/roles';
 import { AuthAndPolicyGuard } from 'src/auth/guards/auth-and-policy.guard';
 import { TokenPayloadParam } from 'src/auth/params/token-payload.param';
-import { CreateUserDto } from './dtos/create-user.dto';
-import { UpdateUserDto } from './dtos/update-user.dto';
-import { UsersService } from './users.service';
+import { CreateUserDto } from '../dtos/create-user.dto';
+import { UpdateUserDto } from '../dtos/update-user.dto';
+import { UsersService } from '../service/users.service';
 
 @Controller('users')
 export class UsersController {
@@ -27,24 +27,32 @@ export class UsersController {
   }
 
   @Get()
-  @UseGuards(AuthAndPolicyGuard)
-  @SetRoutePolicy(Roles.USER)
   findAll() {
     return this.usersService.findAll();
   }
 
   @Get(':id')
+  @UseGuards(AuthAndPolicyGuard)
+  @SetRoutePolicy(Roles.USER || Roles.ADMIN)
   findOne(@Param('id') id: string, @TokenPayloadParam() payload: PayloadDto) {
     return this.usersService.findOne(id, payload);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+  @UseGuards(AuthAndPolicyGuard)
+  @SetRoutePolicy(Roles.USER || Roles.ADMIN)
+  update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @TokenPayloadParam() payload: PayloadDto,
+  ) {
+    return this.usersService.update(id, updateUserDto, payload);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  @UseGuards(AuthAndPolicyGuard)
+  @SetRoutePolicy(Roles.USER || Roles.ADMIN)
+  remove(@Param('id') id: string, @TokenPayloadParam() payload: PayloadDto) {
+    return this.usersService.remove(id, payload);
   }
 }
