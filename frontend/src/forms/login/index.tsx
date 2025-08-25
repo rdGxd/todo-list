@@ -7,11 +7,10 @@ import { loginValidationSchema, type LoginFormData } from "@/lib/validations/log
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-export function LoginPage() {
+export function LoginForm() {
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginValidationSchema),
     defaultValues: {
-      name: "",
       email: "",
       password: "",
     },
@@ -25,20 +24,6 @@ export function LoginPage() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome</FormLabel>
-              <FormControl>
-                <Input placeholder="Digite seu nome" type="text" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={form.control}
           name="email"
