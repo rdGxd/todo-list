@@ -1,3 +1,4 @@
+// Importa dependências do NestJS, TypeORM e entidades relacionadas
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PayloadDto } from 'src/auth/dto/payload.dto';
@@ -9,6 +10,11 @@ import { Task } from '../entities/task.entity';
 import { taskStatus } from '../enums/taskStatus';
 import { TaskMapper } from '../mappers/mapper-taks';
 
+/**
+ * Serviço responsável pela lógica de negócio das tarefas.
+ * Implementa operações CRUD com validação de autorização baseada no usuário.
+ * Todas as operações garantem que usuários só acessem suas próprias tarefas.
+ */
 @Injectable()
 export class TaskService {
   constructor(
@@ -17,6 +23,12 @@ export class TaskService {
     private readonly taskMapper: TaskMapper,
   ) {}
 
+  /**
+   * Cria uma nova tarefa para o usuário autenticado.
+   * @param createTaskDto Dados para criação da tarefa
+   * @param payload Payload do token JWT contendo ID do usuário
+   * @returns Tarefa criada formatada como ResponseTaskDto
+   */
   async create(createTaskDto: CreateTaskDto, payload: PayloadDto) {
     const user = await this.userRepository.findOneBy({ id: payload.sub });
     if (!user) {
@@ -32,6 +44,11 @@ export class TaskService {
     return this.taskMapper.toResponse(task);
   }
 
+  /**
+   * Busca todas as tarefas do usuário autenticado.
+   * @param payload Payload do token JWT contendo ID do usuário
+   * @returns Array de tarefas formatadas como ResponseTaskDto
+   */
   async findAll(payload: PayloadDto) {
     const user = await this.userRepository.findOneBy({ id: payload.sub });
     if (!user) {
@@ -45,6 +62,12 @@ export class TaskService {
     return tasks.map((task) => this.taskMapper.toResponse(task));
   }
 
+  /**
+   * Busca uma tarefa específica do usuário autenticado.
+   * @param id ID da tarefa
+   * @param payload Payload do token JWT contendo ID do usuário
+   * @returns Tarefa formatada como ResponseTaskDto
+   */
   async findOne(id: string, payload: PayloadDto) {
     const user = await this.userRepository.findOneBy({ id: payload.sub });
     if (!user) {
@@ -61,6 +84,13 @@ export class TaskService {
     return this.taskMapper.toResponse(task);
   }
 
+  /**
+   * Atualiza uma tarefa do usuário autenticado.
+   * @param id ID da tarefa
+   * @param updateTaskDto Dados para atualização
+   * @param payload Payload do token JWT contendo ID do usuário
+   * @returns Tarefa atualizada formatada como ResponseTaskDto
+   */
   async update(id: string, updateTaskDto: UpdateTaskDto, payload: PayloadDto) {
     const user = await this.userRepository.findOneBy({ id: payload.sub });
 
@@ -87,6 +117,12 @@ export class TaskService {
     return this.taskMapper.toResponse(task);
   }
 
+  /**
+   * Remove uma tarefa do usuário autenticado.
+   * @param id ID da tarefa
+   * @param payload Payload do token JWT contendo ID do usuário
+   * @returns Tarefa removida formatada como ResponseTaskDto
+   */
   async remove(id: string, payload: PayloadDto) {
     const user = await this.userRepository.findOneBy({ id: payload.sub });
     if (!user) {
@@ -105,6 +141,12 @@ export class TaskService {
     return this.taskMapper.toResponse(task);
   }
 
+  /**
+   * Busca tarefas do usuário autenticado filtradas por status.
+   * @param status Status das tarefas a serem buscadas
+   * @param payload Payload do token JWT contendo ID do usuário
+   * @returns Array de tarefas com o status especificado
+   */
   async findTasksForStatus(status: taskStatus, payload: PayloadDto) {
     const user = await this.userRepository.findOneBy({ id: payload.sub });
     if (!user) {

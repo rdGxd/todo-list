@@ -1,3 +1,4 @@
+// Importa dependências do NestJS para criação de endpoints REST
 import {
   Body,
   Controller,
@@ -18,12 +19,24 @@ import { UpdateTaskDto } from '../dto/update-task.dto';
 import { taskStatus } from '../enums/taskStatus';
 import { TaskService } from '../service/task.service';
 
-@UseGuards(AuthAndPolicyGuard)
-@SetRoutePolicy(Roles.USER || Roles.ADMIN)
+/**
+ * Controller responsável pelos endpoints REST para gerenciamento de tarefas.
+ * Todas as rotas requerem autenticação e permitem acesso para USER ou ADMIN.
+ * Implementa operações CRUD completas com filtros por status.
+ */
+@UseGuards(AuthAndPolicyGuard) // Aplica autenticação e autorização a todas as rotas
+@SetRoutePolicy(Roles.USER || Roles.ADMIN) // Define políticas de acesso globais
 @Controller('task')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
+  /**
+   * Endpoint para criação de novas tarefas.
+   * POST /task
+   * @param createTaskDto Dados para criação da tarefa
+   * @param payload Payload do token JWT
+   * @returns Tarefa criada
+   */
   @Post()
   create(
     @Body() createTaskDto: CreateTaskDto,
@@ -32,16 +45,36 @@ export class TaskController {
     return this.taskService.create(createTaskDto, payload);
   }
 
+  /**
+   * Endpoint para buscar todas as tarefas do usuário autenticado.
+   * GET /task
+   * @param payload Payload do token JWT
+   * @returns Lista de tarefas do usuário
+   */
   @Get()
   findAll(@TokenPayloadParam() payload: PayloadDto) {
     return this.taskService.findAll(payload);
   }
 
+  /**
+   * Endpoint para buscar uma tarefa específica por ID.
+   * GET /task/:id
+   * @param id ID da tarefa
+   * @param payload Payload do token JWT
+   * @returns Dados da tarefa
+   */
   @Get(':id')
   findOne(@Param('id') id: string, @TokenPayloadParam() payload: PayloadDto) {
     return this.taskService.findOne(id, payload);
   }
 
+  /**
+   * Endpoint para buscar tarefas filtradas por status.
+   * GET /task/status/:status
+   * @param status Status das tarefas (PENDING, IN_PROGRESS, COMPLETED)
+   * @param payload Payload do token JWT
+   * @returns Lista de tarefas com o status especificado
+   */
   @Get('status/:status')
   findTasksForStatus(
     @Param('status') status: taskStatus,
@@ -50,6 +83,14 @@ export class TaskController {
     return this.taskService.findTasksForStatus(status, payload);
   }
 
+  /**
+   * Endpoint para atualizar dados de uma tarefa.
+   * PATCH /task/:id
+   * @param id ID da tarefa
+   * @param updateTaskDto Dados para atualização
+   * @param payload Payload do token JWT
+   * @returns Tarefa atualizada
+   */
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -59,6 +100,13 @@ export class TaskController {
     return this.taskService.update(id, updateTaskDto, payload);
   }
 
+  /**
+   * Endpoint para remover uma tarefa.
+   * DELETE /task/:id
+   * @param id ID da tarefa
+   * @param payload Payload do token JWT
+   * @returns Confirmação da remoção
+   */
   @Delete(':id')
   remove(@Param('id') id: string, @TokenPayloadParam() payload: PayloadDto) {
     return this.taskService.remove(id, payload);

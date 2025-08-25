@@ -13,9 +13,35 @@ src/
 ├── main.ts                 # Ponto de entrada da aplicação
 ├── app.module.ts           # Módulo raiz
 ├── global/                 # Configurações globais
+│   ├── pipes.config.ts     # Configuração de pipes de validação
+│   └── typeOrmModule.config.ts # Configuração do TypeORM
 ├── auth/                   # Módulo de autenticação
+│   ├── config/             # Configurações JWT
+│   ├── constants/          # Constantes de autenticação
+│   ├── controllers/        # Controllers de auth
+│   ├── decorators/         # Decorators personalizados
+│   ├── dto/                # DTOs de autenticação
+│   ├── enums/              # Enums de roles
+│   ├── guards/             # Guards de proteção
+│   ├── hashing/            # Serviços de hash
+│   ├── params/             # Param decorators
+│   ├── services/           # Lógica de autenticação
+│   └── tests/              # Testes unitários
 ├── users/                  # Módulo de usuários
+│   ├── controller/         # Controllers de usuários
+│   ├── dtos/               # DTOs de usuários
+│   ├── entities/           # Entidade User
+│   ├── mappers/            # Mappers de conversão
+│   ├── service/            # Lógica de negócio
+│   └── tests/              # Testes unitários
 └── task/                   # Módulo de tarefas
+    ├── controller/         # Controllers de tarefas
+    ├── dto/                # DTOs de tarefas
+    ├── entities/           # Entidade Task
+    ├── enums/              # Enum de status
+    ├── mappers/            # Mappers de conversão
+    ├── service/            # Lógica de negócio
+    └── tests/              # Testes unitários
 ```
 
 ### Padrões Arquiteturais Utilizados
@@ -95,6 +121,50 @@ export class AppModule {}
 - **Orquestração de módulos**: Importa todos os módulos funcionais
 - **Configuração global**: Variáveis de ambiente e banco de dados
 - **Ponto central**: Conecta todas as partes da aplicação
+
+## ⚙️ Configurações Globais
+
+### pipes.config.ts
+
+```typescript
+/**
+ * Configuração global dos pipes de validação
+ * Define como as validações serão aplicadas em toda a aplicação
+ */
+export const GlobalPipesConfig = () => {
+  const validationPipe = new ValidationPipe({
+    whitelist: true, // Remove propriedades não declaradas nos DTOs
+    forbidNonWhitelisted: true, // Retorna erro se propriedades extras forem enviadas
+    transform: false, // Não transforma automaticamente os tipos
+  });
+
+  return [validationPipe];
+};
+```
+
+### typeOrmModule.config.ts
+
+```typescript
+/**
+ * Configuração assíncrona do módulo TypeORM
+ * Permite que as configurações sejam carregadas dinamicamente das variáveis de ambiente
+ */
+const typeOrmConfig = (config: ConfigService): TypeOrmModuleOptions => ({
+  type: config.get<string>('TYPEORM_TYPE') as 'postgres', // Tipo do banco de dados (PostgreSQL)
+  host: config.get<string>('DATABASE_HOST'), // Host do banco de dados
+  port: config.get<number>('DATABASE_PORT'), // Porta do banco de dados
+  username: config.get<string>('DATABASE_USERNAME'), // Nome de usuário do banco
+  password: config.get<string>('DATABASE_PASSWORD'), // Senha do banco de dados
+  database: config.get<string>('DATABASE_DATABASE'), // Nome do banco de dados
+  synchronize: config.get<boolean>('DATABASE_SYNCHRONIZE'), // Sincronização automática do schema
+  autoLoadEntities: config.get<boolean>('DATABASE_AUTO_LOAD_ENTITIES'), // Carregamento automático das entidades
+});
+
+export const TypeOrmModuleConfig = TypeOrmModule.forRootAsync({
+  useFactory: (config: ConfigService) => typeOrmConfig(config), // Factory function para criar a configuração
+  inject: [ConfigService], // Injeta o ConfigService como dependência
+});
+```
 
 ## 👤 Módulo de Usuários
 
@@ -210,6 +280,108 @@ export class UsersService {
 }
 ```
 
+### TaskService
+
+```typescript
+/**
+ * Serviço responsável pela lógica de negócio das tarefas.
+ * Implementa operações CRUD com validação de autorização baseada no usuário.
+ * Todas as operações garantem que usuários só acessem suas próprias tarefas.
+ */
+@Injectable()
+export class TaskService {
+  constructor(
+    @InjectRepository(Task) private readonly taskRepository: Repository<Task>,
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly taskMapper: TaskMapper,
+  ) {}
+
+  /**
+   * Cria uma nova tarefa para o usuário autenticado.
+   * @param createTaskDto Dados para criação da tarefa
+   * @param payload Payload do token JWT contendo ID do usuário
+   * @returns Tarefa criada formatada como ResponseTaskDto
+   */
+  async create(createTaskDto: CreateTaskDto, payload: PayloadDto) {
+    const user = await this.userRepository.findOneBy({ id: payload.sub });
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const task = this.taskMapper.toEntity(createTaskDto);
+    task.user = user;
+    user.tasks.push(task);
+    await this.taskRepository.save(task);
+    await this.userRepository.save(user);
+
+    return this.taskMapper.toResponse(task);
+  }
+
+  /**
+   * Busca tarefas do usuário autenticado filtradas por status.
+   * @param status Status das tarefas a serem buscadas
+   * @param payload Payload do token JWT contendo ID do usuário
+   * @returns Array de tarefas com o status especificado
+   */
+  async findTasksForStatus(status: taskStatus, payload: PayloadDto) {
+    const user = await this.userRepository.findOneBy({ id: payload.sub });
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const tasks = await this.taskRepository.find({
+      where: { user, status },
+      relations: ['user', 'user.tasks'],
+    });
+    return tasks.map((task) => this.taskMapper.toResponse(task));
+  }
+
+  // Outros métodos: findAll, findOne, update, remove...
+}
+```
+
+### TaskController
+
+```typescript
+/**
+ * Controller responsável pelos endpoints REST para gerenciamento de tarefas.
+ * Todas as rotas requerem autenticação e permitem acesso para USER ou ADMIN.
+ * Implementa operações CRUD completas com filtros por status.
+ */
+@UseGuards(AuthAndPolicyGuard) // Aplica autenticação e autorização a todas as rotas
+@SetRoutePolicy(Roles.USER || Roles.ADMIN) // Define políticas de acesso globais
+@Controller('task')
+export class TaskController {
+  constructor(private readonly taskService: TaskService) {}
+
+  /**
+   * Endpoint para criação de novas tarefas.
+   * POST /task
+   */
+  @Post()
+  create(
+    @Body() createTaskDto: CreateTaskDto,
+    @TokenPayloadParam() payload: PayloadDto,
+  ) {
+    return this.taskService.create(createTaskDto, payload);
+  }
+
+  /**
+   * Endpoint para buscar tarefas filtradas por status.
+   * GET /task/status/:status
+   */
+  @Get('status/:status')
+  findTasksForStatus(
+    @Param('status') status: taskStatus,
+    @TokenPayloadParam() payload: PayloadDto,
+  ) {
+    return this.taskService.findTasksForStatus(status, payload);
+  }
+
+  // Outros endpoints: findAll, findOne, update, remove...
+}
+```
+
 ## 📋 Módulo de Tarefas
 
 ### Entidade Task
@@ -259,12 +431,91 @@ export class Task {
 
 ```typescript
 /**
- * Estados possíveis de uma tarefa
+ * Enum que define os possíveis status de uma tarefa
+ * Usado para controlar o estado/progresso das tarefas no sistema
  */
 export enum taskStatus {
-  PENDING = 'PENDING', // Pendente
-  PROGRESS = 'PROGRESS', // Em progresso
-  COMPLETED = 'COMPLETED', // Concluída
+  PENDING = 'PENDING', // Tarefa criada mas ainda não iniciada
+  IN_PROGRESS = 'IN_PROGRESS', // Tarefa em andamento
+  COMPLETED = 'COMPLETED', // Tarefa finalizada/concluída
+}
+```
+
+### DTOs de Tarefas
+
+#### CreateTaskDto
+
+```typescript
+/**
+ * DTO (Data Transfer Object) para criação de uma nova tarefa.
+ * Define a estrutura e validações dos dados necessários para criar uma task.
+ */
+export class CreateTaskDto {
+  /**
+   * Título da tarefa - obrigatório e deve ser uma string
+   */
+  @IsString()
+  title: string;
+
+  /**
+   * Descrição detalhada da tarefa - obrigatório e deve ser uma string
+   */
+  @IsString()
+  description: string;
+}
+```
+
+#### UpdateTaskDto
+
+```typescript
+/**
+ * DTO (Data Transfer Object) para atualização de uma tarefa.
+ * Herda de CreateTaskDto através de PartialType, tornando todos os campos opcionais.
+ * Adiciona validação específica para o campo status.
+ */
+export class UpdateTaskDto extends PartialType(CreateTaskDto) {
+  @IsString()
+  @IsOptional()
+  title: string;
+
+  @IsString()
+  @IsOptional()
+  description: string;
+
+  @IsEnum(taskStatus)
+  @IsOptional()
+  status: taskStatus;
+}
+```
+
+#### ResponseTaskDto
+
+```typescript
+/**
+ * DTO (Data Transfer Object) para resposta de operações com tarefas.
+ * Define a estrutura padronizada dos dados de uma tarefa retornados pela API.
+ */
+export class ResponseTaskDto {
+  @IsString()
+  taskId: string;
+
+  @IsString()
+  userId: string;
+
+  @IsString()
+  title: string;
+
+  @IsString()
+  description: string;
+
+  @IsEnum(taskStatus)
+  status: taskStatus;
+
+  @IsString()
+  createdAt: string;
+
+  @IsString()
+  updatedAt: string;
 }
 ```
 
@@ -274,12 +525,35 @@ export enum taskStatus {
 
 ```
 auth/
-├── guards/                 # Guards para proteção de rotas
+├── config/                # Configurações JWT
+│   └── jwt.config.ts      # Configuração de tokens
+├── constants/             # Constantes
+│   ├── auth.constants.ts  # Chaves de requisição
+│   └── route.constants.ts # Chaves de políticas
+├── controllers/           # Controllers
+│   └── auth.controller.ts # Endpoints de autenticação
 ├── decorators/            # Decorators personalizados
-├── services/              # Lógica de autenticação
+│   └── set-route-policy.decorator.ts # Decorator de roles
 ├── dto/                   # DTOs para login/tokens
-├── hashing/              # Serviços de hash
-└── config/               # Configuração JWT
+│   ├── login.dto.ts       # DTO de login
+│   ├── payload.dto.ts     # DTO do payload JWT
+│   └── refreshToken.dto.ts # DTO de refresh token
+├── enums/                 # Enumerações
+│   └── roles.ts           # Enum de roles (USER, ADMIN)
+├── guards/                # Guards para proteção de rotas
+│   ├── auth.guard.ts      # Guard de autenticação JWT
+│   ├── roles.guard.ts     # Guard de autorização por roles
+│   └── auth-and-policy.guard.ts # Guard combinado
+├── hashing/               # Serviços de hash
+│   ├── hashing.service.ts # Interface/protocolo de hash
+│   └── BcryptPassword.service.ts # Implementação bcrypt
+├── params/                # Param decorators
+│   └── token-payload.param.ts # Decorator para payload JWT
+├── services/              # Lógica de autenticação
+│   └── auth.service.ts    # Service principal de auth
+└── tests/                 # Testes unitários
+    ├── auth.controller.spec.ts
+    └── auth.service.spec.ts
 ```
 
 ### Guards Implementados
@@ -308,6 +582,72 @@ auth/
 2. **Validação**: Sistema verifica credenciais
 3. **Token**: Gera JWT com dados do usuário
 4. **Autorização**: Guards protegem rotas subsequentes
+
+## 🔄 Padrão Mapper
+
+### TaskMapper
+
+```typescript
+/**
+ * Mapper responsável por converter entre entidades Task e DTOs.
+ * Centraliza a lógica de transformação de dados entre as camadas da aplicação.
+ */
+@Injectable()
+export class TaskMapper {
+  /**
+   * Converte uma entidade Task em um DTO de resposta.
+   * Mapeia todos os campos necessários para a resposta da API.
+   */
+  toResponse(entity: Task): ResponseTaskDto {
+    const response = new ResponseTaskDto();
+    response.taskId = entity.id;
+    response.title = entity.title;
+    response.description = entity.description;
+    response.status = entity.status;
+    response.userId = entity.user.id;
+    response.createdAt = entity.createdAt;
+    response.updatedAt = entity.updatedAt;
+    return response;
+  }
+
+  /**
+   * Converte um DTO de criação em uma entidade Task.
+   * Utiliza class-transformer para fazer a conversão automática.
+   */
+  toEntity(dto: CreateTaskDto): Task {
+    return plainToInstance(Task, dto);
+  }
+}
+```
+
+### UserMapper
+
+```typescript
+/**
+ * Mapper para conversão entre entidades User e DTOs
+ * Centraliza transformações e garante consistência
+ */
+@Injectable()
+export class UserMapper {
+  /**
+   * Converte entidade User para DTO de resposta
+   * Remove dados sensíveis como senha
+   */
+  toResponse(entity: User): ResponseUserDto {
+    return plainToInstance(ResponseUserDto, entity, {
+      excludeExtraneousValues: true, // Só inclui campos marcados com @Expose
+    });
+  }
+
+  /**
+   * Converte DTO para entidade User
+   * Usado na criação de novos usuários
+   */
+  toEntity(dto: CreateUserDto): User {
+    return plainToInstance(User, dto);
+  }
+}
+```
 
 ## 🧪 Testes Unitários
 
