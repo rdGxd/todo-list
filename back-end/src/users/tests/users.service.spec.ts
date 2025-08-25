@@ -189,12 +189,14 @@ describe('UsersService', () => {
       updatedAt: new Date(),
     };
 
+    jest.spyOn(usersRepository, 'findOneBy').mockResolvedValue(mockUser as any);
     jest.spyOn(usersRepository, 'preload').mockResolvedValue(mockUser as any);
     jest.spyOn(usersRepository, 'save').mockResolvedValue(mockUser as any);
 
     const result = await service.update('1', updateDto, payload);
 
     expect(result).toBeDefined();
+    expect(usersRepository.findOneBy).toHaveBeenCalledWith({ id: '1' });
     expect(usersRepository.preload).toHaveBeenCalledWith({
       id: '1',
       ...updateDto,
@@ -206,6 +208,17 @@ describe('UsersService', () => {
   it('should throw error when updating user with different id than payload', async () => {
     const updateDto = { name: 'Updated Name' };
     const payload = { sub: '2' } as PayloadDto;
+    const mockUser = {
+      id: '1',
+      email: 'test@example.com',
+      name: 'Test User',
+      tasks: [],
+      roles: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    jest.spyOn(usersRepository, 'findOneBy').mockResolvedValue(mockUser as any);
 
     await expect(service.update('1', updateDto, payload)).rejects.toThrow(
       'You can only update your own user data',
@@ -237,6 +250,7 @@ describe('UsersService', () => {
       updatedAt: new Date(),
     };
 
+    jest.spyOn(usersRepository, 'findOneBy').mockResolvedValue(mockUser as any);
     jest.spyOn(usersRepository, 'preload').mockResolvedValue(mockUser as any);
     jest.spyOn(hashingService, 'hash').mockResolvedValue('hashed_new_password');
     jest.spyOn(usersRepository, 'save').mockResolvedValue(mockUser as any);
@@ -244,6 +258,7 @@ describe('UsersService', () => {
     const result = await service.update('1', updateDto, payload);
 
     expect(result).toBeDefined();
+    expect(usersRepository.findOneBy).toHaveBeenCalledWith({ id: '1' });
     expect(hashingService.hash).toHaveBeenCalledWith('newPassword');
     expect(usersRepository.save).toHaveBeenCalledWith(mockUser);
     expect(userMapper.toResponse).toHaveBeenCalledWith(mockUser);

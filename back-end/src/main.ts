@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import 'reflect-metadata'; // Necessário para o TypeORM funcionar corretamente
 import { AppModule } from './app.module';
 import { GlobalPipesConfig } from './global/pipes.config';
+import { SwaggerConfig } from './global/swagger.config';
 
 /**
  * Função principal que inicializa a aplicação NestJS
@@ -14,6 +15,9 @@ async function bootstrap() {
 
   // Aplica pipes globais para validação automática de DTOs em todas as rotas
   app.useGlobalPipes(...GlobalPipesConfig());
+
+  // Configura o Swagger para documentação da API
+  SwaggerConfig(app);
 
   // Inicia o servidor na porta especificada nas variáveis de ambiente ou 3000 como padrão
   await app.listen(process.env.PORT ?? 3000);

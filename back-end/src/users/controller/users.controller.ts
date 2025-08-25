@@ -9,12 +9,19 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiBody,
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { SetRoutePolicy } from 'src/auth/decorators/set-route-policy.decorator';
 import { PayloadDto } from 'src/auth/dto/payload.dto';
 import { Roles } from 'src/auth/enums/roles';
 import { AuthAndPolicyGuard } from 'src/auth/guards/auth-and-policy.guard';
 import { TokenPayloadParam } from 'src/auth/params/token-payload.param';
 import { CreateUserDto } from '../dtos/create-user.dto';
+import { ResponseUserDto } from '../dtos/response-user.dto';
 import { UpdateUserDto } from '../dtos/update-user.dto';
 import { UsersService } from '../service/users.service';
 
@@ -22,6 +29,7 @@ import { UsersService } from '../service/users.service';
  * Controller responsável pelos endpoints REST para gerenciamento de usuários.
  * Implementa operações CRUD com autenticação e autorização baseada em roles.
  */
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -33,6 +41,30 @@ export class UsersController {
    * @returns Usuário criado
    */
   @Post()
+  @ApiOperation({
+    summary: 'Criar novo usuário',
+    description: 'Cria um novo usuário no sistema com role padrão USER',
+  })
+  @ApiBody({
+    type: CreateUserDto,
+    description: 'Dados do usuário a ser criado',
+    examples: {
+      example1: {
+        summary: 'Usuário completo',
+        description: 'Exemplo de criação de usuário com todos os campos',
+        value: {
+          email: 'joao.silva@exemplo.com',
+          name: 'João da Silva',
+          password: 'minhasenha123',
+        },
+      },
+    },
+  })
+  @ApiCreatedResponse({
+    description: 'Usuário criado com sucesso',
+    type: ResponseUserDto,
+  })
+  @ApiOperation({ summary: 'Criar usuário' })
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
@@ -43,6 +75,15 @@ export class UsersController {
    * @returns Lista de todos os usuários
    */
   @Get()
+  @ApiOperation({
+    summary: 'Listar todos os usuários',
+    description:
+      'Retorna uma lista com todos os usuários cadastrados no sistema',
+  })
+  @ApiCreatedResponse({
+    description: 'Lista de usuários retornada com sucesso',
+    type: [ResponseUserDto],
+  })
   findAll() {
     return this.usersService.findAll();
   }

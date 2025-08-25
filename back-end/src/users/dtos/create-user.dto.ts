@@ -1,4 +1,4 @@
-// Importa decorators de validação do class-validator
+import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
 
 /**
@@ -6,17 +6,42 @@ import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
  * Define a estrutura e validações para dados de entrada na criação de usuários
  */
 export class CreateUserDto {
-  // Validação de email: deve ser um formato de email válido
+  /**
+   * E-mail do usuário - deve ser único no sistema
+   */
+  @ApiProperty({
+    description: 'E-mail único do usuário para login e identificação',
+    example: 'joao.silva@exemplo.com',
+    format: 'email',
+    uniqueItems: true,
+  })
   @IsEmail()
   email: string;
 
-  // Validação de nome: string entre 3 e 50 caracteres, não pode ser vazio
+  /**
+   * Nome completo do usuário
+   */
+  @ApiProperty({
+    description: 'Nome completo do usuário',
+    example: 'João da Silva',
+    minLength: 3,
+    maxLength: 50,
+  })
   @IsString()
   @Length(3, 50)
   @IsNotEmpty()
   name: string;
 
-  // Validação de senha: string entre 6 e 20 caracteres, não pode ser vazia
+  /**
+   * Senha do usuário para autenticação
+   */
+  @ApiProperty({
+    description: 'Senha do usuário para autenticação (será hasheada)',
+    example: 'minhasenha123',
+    minLength: 6,
+    maxLength: 20,
+    format: 'password',
+  })
   @IsString()
   @Length(6, 20)
   @IsNotEmpty()

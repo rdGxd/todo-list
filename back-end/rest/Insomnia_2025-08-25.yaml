@@ -1,0 +1,472 @@
+type: collection.insomnia.rest/5.0
+name: Todo_List
+meta:
+  id: wrk_8045a4e0f7d644b5b7acf9b5c7126a3a
+  created: 1755796687960
+  modified: 1756048536756
+  description: ""
+collection:
+  - name: Task
+    meta:
+      id: fld_641e1961951c43a6bd429879d309608a
+      created: 1754914497342
+      modified: 1756081441653
+      sortKey: -1754914497342
+      description: ""
+    children:
+      - url: "{{ _.baseUrl }}/task"
+        name: GetAllTask
+        meta:
+          id: req_882f202b891e40a4b3f4a66525bef048
+          created: 1754588803978
+          modified: 1756129835948
+          isPrivate: false
+          description: ""
+          sortKey: -1754914504554
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.4.0
+        authentication:
+          disabled: false
+          token: "{{ _.accessToken }}"
+          type: bearer
+        scripts:
+          preRequest: ""
+          afterResponse: ""
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseUrl }}/task/{{ _.IdTask }}"
+        name: GetOneTask
+        meta:
+          id: req_bb3271f4d2564e18af11f1bcb24073bc
+          created: 1754914574037
+          modified: 1756129832283
+          isPrivate: false
+          description: ""
+          sortKey: -1754914574037
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.4.0
+        scripts:
+          preRequest: ""
+          afterResponse: ""
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseUrl }}/task"
+        name: CreateTask
+        meta:
+          id: req_9aef3af53b24463ab96dc6154f5d7762
+          created: 1754915323072
+          modified: 1756129821129
+          isPrivate: false
+          description: ""
+          sortKey: -1754915323072
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            	{
+            		"title": "{% faker 'randomLoremParagraph' %}",
+            		"description": "{% faker 'randomLoremParagraph' %}"
+            	}
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.4.0
+        authentication:
+          token: "{{ _.accessToken }}"
+          type: bearer
+        scripts:
+          preRequest: ""
+          afterResponse: >+
+            // Converte o corpo da resposta (string) para objeto JSON
+
+            const responseJson = JSON.parse(insomnia.response.body);
+
+
+            // Pega o valor desejado, por exemplo, o token
+
+            const tokenId = responseJson.id;
+
+
+            // Atualiza a variável de ambiente (não funciona diretamente aqui,
+            então usamos o workspace)
+
+            const env = await insomnia.environment.set("IdTask", tokenId);
+
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseUrl }}/task/{{ _.IdTask }}"
+        name: UpdateTask
+        meta:
+          id: req_bf1bf3c78e8c4db5845cacb8a04609b7
+          created: 1754917034748
+          modified: 1756129845317
+          isPrivate: false
+          description: ""
+          sortKey: -1754917034748
+        method: PATCH
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            		"text": "A2234",
+            		"isRead": true
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.4.0
+        scripts:
+          preRequest: ""
+          afterResponse: ""
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseUrl }}/task/{{ _.IdTask }}"
+        name: DeleteTask
+        meta:
+          id: req_6e43edacbf6a4a32a76f83820c39703d
+          created: 1754917213033
+          modified: 1756129849541
+          isPrivate: false
+          description: ""
+          sortKey: -1754917213033
+        method: DELETE
+        headers:
+          - name: User-Agent
+            value: insomnia/11.4.0
+        authentication:
+          token: "{{ _.accessToken }}"
+          type: bearer
+        scripts:
+          preRequest: ""
+          afterResponse: ""
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+    scripts:
+      afterResponse: ""
+      preRequest: ""
+  - name: User
+    meta:
+      id: fld_cf4a1c67eff643ddab3afae1fbe63dff
+      created: 1754991325346
+      modified: 1756080488218
+      sortKey: -1754991325346
+      description: ""
+    children:
+      - url: "{{ _.baseUrl }}/users"
+        name: CreateUser
+        meta:
+          id: req_99adcba094b84f1e956f5e5777932468
+          created: 1754991338315
+          modified: 1756048536751
+          isPrivate: false
+          description: ""
+          sortKey: -1754991338315
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"name": "{% faker 'randomFullName' %}",
+            	"email": "{% faker 'randomEmail' %}",
+            	"password": "{{ _.password }}"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.4.0
+        scripts:
+          preRequest: ""
+          afterResponse: >+
+            // Converte o corpo da resposta (string) para objeto JSON
+
+            const responseJson = JSON.parse(insomnia.response.body);
+
+
+            // Pega o valor desejado, por exemplo, o token
+
+            const id = responseJson.id;
+
+            const email = responseJson.email;
+
+            const name = responseJson.name;
+
+
+            // Atualiza a variável de ambiente (não funciona diretamente aqui,
+            então usamos o workspace)
+
+            await insomnia.environment.set("IdUser", id);
+
+            await insomnia.environment.set("email", email);
+
+            await insomnia.environment.set("name", name);
+
+
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseUrl }}/users"
+        name: GetAllUsers
+        meta:
+          id: req_69519eb4b2af409f91e48a0f0bce0173
+          created: 1754993169060
+          modified: 1756048536747
+          isPrivate: false
+          description: ""
+          sortKey: -1754993169060
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.4.0
+        authentication:
+          token: "{{ _.accessToken }}"
+          type: bearer
+        scripts:
+          preRequest: ""
+          afterResponse: ""
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseUrl }}/users/{{ _.IdUser }}"
+        name: GetOneUser
+        meta:
+          id: req_7ec017706fbc486981c5320313af2316
+          created: 1754993191144
+          modified: 1756080600973
+          isPrivate: false
+          description: ""
+          sortKey: -1754993191144
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.4.0
+        authentication:
+          type: bearer
+          token: "{{ _.accessToken }}"
+        scripts:
+          preRequest: ""
+          afterResponse: ""
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseUrl }}/users/{{ _.IdUser }}"
+        name: Atualizar User
+        meta:
+          id: req_9c5046f1dec345ba88caa48973b822ef
+          created: 1755262843248
+          modified: 1756048536753
+          isPrivate: false
+          description: ""
+          sortKey: -1755262843248
+        method: PATCH
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"name": "{% faker 'randomFullName' %}",
+            	"email": "{{ _.email }}",
+            	"password": "{{ _.password }}"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.4.0
+        scripts:
+          preRequest: ""
+          afterResponse: ""
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+    scripts:
+      afterResponse: ""
+      preRequest: ""
+  - name: Auth
+    meta:
+      id: fld_3eb15b5e222d4560898b1d099ace2b81
+      created: 1755263624210
+      modified: 1756080491339
+      sortKey: -1755263624210
+      description: ""
+    children:
+      - url: "{{ _.baseUrl }}/auth/login"
+        name: Login
+        meta:
+          id: req_8593fbfa7fd2400f8de2be63dbf57700
+          created: 1755263626658
+          modified: 1756048536749
+          isPrivate: false
+          description: ""
+          sortKey: -1755263626658
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"email": "{{ _.email }}",
+            	"password": "{{ _.password }}"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.4.0
+        scripts:
+          preRequest: ""
+          afterResponse: >+
+            // Converte o corpo da resposta (string) para objeto JSON
+
+            const responseJson = JSON.parse(insomnia.response.body);
+
+
+            // Pega o valor desejado, por exemplo, o token
+
+            const {accessToken, refreshToken} = responseJson
+
+
+            // Atualiza a variável de ambiente (não funciona diretamente aqui,
+            então usamos o workspace)
+
+            await insomnia.environment.set("accessToken",accessToken);
+
+            await insomnia.environment.set("refreshToken",refreshToken);
+
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseUrl }}/auth/refresh"
+        name: Re-Auth
+        meta:
+          id: req_a955ccd49e4942cb8cc2d87ef17a265c
+          created: 1755280227880
+          modified: 1756048536753
+          isPrivate: false
+          description: ""
+          sortKey: -1755263234953
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"refreshToken": "{{ _.refreshToken }}"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.4.0
+        authentication:
+          type: none
+        scripts:
+          preRequest: ""
+          afterResponse: >
+            // Converte o corpo da resposta (string) para objeto JSON
+
+            const responseJson = JSON.parse(insomnia.response.body);
+
+
+            // Pega o valor desejado, por exemplo, o token
+
+            const {accessToken, refreshToken} = responseJson
+
+
+            // Atualiza a variável de ambiente (não funciona diretamente aqui,
+            então usamos o workspace)
+
+            await insomnia.environment.set("accessToken",accessToken);
+
+            await insomnia.environment.set("refreshToken",refreshToken);
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+    scripts:
+      afterResponse: ""
+      preRequest: ""
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_e4e2d5dad251ff198a0a0d906dbb3933615dc894
+    created: 1756048536804
+    modified: 1756081441651
+environments:
+  name: Base Environment
+  meta:
+    id: env_4200f1f9d3174f948e241c3495979bd4
+    created: 1754588774214
+    modified: 1756081441653
+    isPrivate: false
+  data:
+    IdUser: 850a1466-fa60-4f27-91ec-dbae26057866
+    accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NTBhMTQ2Ni1mYTYwLTRmMjctOTFlYy1kYmFlMjYwNTc4NjYiLCJpYXQiOjE3NTYwODA0OTIsImV4cCI6MTc1NjA4NDA5MiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwIn0.36KV5urGeeixGYrneJeInRWYa4MqRRIXfvAkpjYxy1w
+    baseUrl: http://localhost:3000
+    email: Tremaine_DuBuque96@yahoo.com
+    name: Erick Boyle
+    password: "123456"
+    picture: ceb15f2f-0ed4-4e5c-ac97-ecd406df7252.png
+    refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NTBhMTQ2Ni1mYTYwLTRmMjctOTFlYy1kYmFlMjYwNTc4NjYiLCJpYXQiOjE3NTYwODA0OTIsImV4cCI6MTc1NjE2Njg5MiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwIn0.vRbtCUkm9Ywdhm5ip58dLTOd935vWFjIyaez4kt-J9Y
