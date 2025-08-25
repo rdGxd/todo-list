@@ -31,23 +31,76 @@ export class TaskService {
     return this.taskMapper.toResponseDto(task);
   }
 
-  findAll() {
-    return `This action returns all task`;
+  async findAll(payload: PayloadDto) {
+    const user = await this.userRepository.findOneBy({ id: payload.sub });
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const tasks = await this.taskRepository.find({
+      where: { user },
+      relations: ['user', 'user.tasks'],
+    });
+    return tasks.map((task) => this.taskMapper.toResponseDto(task));
   }
 
-  async findOne(id: string) {
-    const task = await this.taskRepository.findOneBy({ id });
+  async findOne(id: string, payload: PayloadDto) {
+    const user = await this.userRepository.findOneBy({ id: payload.sub });
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const task = await this.taskRepository.findOne({
+      where: { id, user },
+      relations: ['user', 'user.tasks'],
+    });
     if (!task) {
       throw new Error('Task not found');
     }
     return this.taskMapper.toResponseDto(task);
   }
 
-  update(id: string, updateTaskDto: UpdateTaskDto) {
-    return `This action updates a #${id} task`;
+  async update(id: string, updateTaskDto: UpdateTaskDto, payload: PayloadDto) {
+    const user = await this.userRepository.findOneBy({ id: payload.sub });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const task = await this.taskRepository.findOne({
+      where: { id, user },
+      relations: ['user', 'user.tasks'],
+    });
+
+    if (!task) {
+      throw new Error('Task not found');
+    }
+
+    await this.taskRepository.preload({
+      status: updateTaskDto.status ?? task.status,
+      title: updateTaskDto.title ?? task.title,
+      description: updateTaskDto.description ?? task.description,
+    });
+
+    await this.taskRepository.save(task);
+    return this.taskMapper.toResponseDto(task);
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} task`;
+  async remove(id: string, payload: PayloadDto) {
+    const user = await this.userRepository.findOneBy({ id: payload.sub });
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const task = await this.taskRepository.findOne({
+      where: { id, user },
+      relations: ['user', 'user.tasks'],
+    });
+    if (!task) {
+      throw new Error('Task not found');
+    }
+
+    await this.taskRepository.remove(task);
+    return this.taskMapper.toResponseDto(task);
   }
 }

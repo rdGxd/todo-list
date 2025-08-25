@@ -32,22 +32,22 @@ export class TaskController {
   }
 
   @Get()
-  findAll() {
-    return this.taskService.findAll();
+  findAll(@TokenPayloadParam() payload: PayloadDto) {
+    return this.taskService.findAll(payload);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.taskService.findOne(id);
+  findOne(@Param('id') id: string, @TokenPayloadParam() payload: PayloadDto) {
+    return this.taskService.findOne(id, payload);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-    return this.taskService.update(id, updateTaskDto);
+  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto, @TokenPayloadParam() payload: PayloadDto) {
+    return this.taskService.update(id, updateTaskDto, payload);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.taskService.remove(id);
+  remove(@Param('id') id: string, @TokenPayloadParam() payload: PayloadDto) {
+    return this.taskService.remove(id, payload);
   }
 }
