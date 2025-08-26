@@ -6,10 +6,13 @@ import { Input } from "@/components/ui/input";
 import { RegisterFormData, signupValidationSchema } from "@/lib/validations/create-account";
 import { UserServiceClient } from "@/services/user/client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 export function RegisterForm() {
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(signupValidationSchema),
     defaultValues: {
@@ -20,13 +23,16 @@ export function RegisterForm() {
   });
 
   const onSubmit = async (formData: RegisterFormData) => {
-    const response = await UserServiceClient.register(formData);
+    setIsLoading(true);
     try {
+      const response = await UserServiceClient.register(formData);
       if (response.status === 201) {
         toast.success("Cadastro bem-sucedido!");
       }
     } catch {
       toast.error("Erro ao fazer cadastro. Tente novamente.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -35,6 +41,7 @@ export function RegisterForm() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
+            disabled={isLoading}
             control={form.control}
             name="name"
             render={({ field }) => (
@@ -49,6 +56,7 @@ export function RegisterForm() {
           />
 
           <FormField
+            disabled={isLoading}
             control={form.control}
             name="email"
             render={({ field }) => (
@@ -63,6 +71,7 @@ export function RegisterForm() {
           />
 
           <FormField
+            disabled={isLoading}
             control={form.control}
             name="password"
             render={({ field }) => (
@@ -76,7 +85,7 @@ export function RegisterForm() {
             )}
           />
 
-          <Button type="submit" className="w-full cursor-pointer">
+          <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>
             Criar conta
           </Button>
         </form>

@@ -6,10 +6,13 @@ import { Input } from "@/components/ui/input";
 import { LoginFormData, loginValidationSchema } from "@/lib/validations/login";
 import { UserServiceClient } from "@/services/user/client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 export function LoginForm() {
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginValidationSchema),
     defaultValues: {
@@ -19,13 +22,16 @@ export function LoginForm() {
   });
 
   const onSubmit = async (formData: LoginFormData) => {
-    const response = await UserServiceClient.login(formData);
+    setIsLoading(true);
     try {
+      const response = await UserServiceClient.login(formData);
       if (response.status === 201) {
         toast.success("Login bem-sucedido!");
       }
     } catch {
       toast.error("Erro ao fazer login. Tente novamente.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -34,6 +40,7 @@ export function LoginForm() {
       <FormProvider {...form}>
         <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
           <FormField
+            disabled={isLoading}
             control={form.control}
             name="email"
             render={({ field }) => (
@@ -48,6 +55,7 @@ export function LoginForm() {
           />
 
           <FormField
+            disabled={isLoading}
             control={form.control}
             name="password"
             render={({ field }) => (
@@ -61,7 +69,7 @@ export function LoginForm() {
             )}
           />
 
-          <Button type="submit" className="w-full cursor-pointer">
+          <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>
             Entrar
           </Button>
         </form>
