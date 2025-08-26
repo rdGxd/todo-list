@@ -75,7 +75,7 @@ export class TaskService {
     }
 
     const task = await this.taskRepository.findOne({
-      where: { id, user },
+      where: { user: { id: user.id }, id },
       relations: ['user', 'user.tasks'],
     });
     if (!task) {
@@ -93,13 +93,14 @@ export class TaskService {
    */
   async update(id: string, updateTaskDto: UpdateTaskDto, payload: PayloadDto) {
     const user = await this.userRepository.findOneBy({ id: payload.sub });
+    console.log(updateTaskDto);
 
     if (!user) {
       throw new Error('User not found');
     }
 
     const task = await this.taskRepository.findOne({
-      where: { id, user },
+      where: { user: { id: user.id }, id },
       relations: ['user', 'user.tasks'],
     });
 
@@ -107,11 +108,10 @@ export class TaskService {
       throw new Error('Task not found');
     }
 
-    await this.taskRepository.preload({
-      status: updateTaskDto.status ?? task.status,
-      title: updateTaskDto.title ?? task.title,
-      description: updateTaskDto.description ?? task.description,
-    });
+    // Atualiza as propriedades diretamente
+    task.status = updateTaskDto.status ?? task.status;
+    task.title = updateTaskDto.title ?? task.title;
+    task.description = updateTaskDto.description ?? task.description;
 
     await this.taskRepository.save(task);
     return this.taskMapper.toResponse(task);
@@ -154,7 +154,7 @@ export class TaskService {
     }
 
     const tasks = await this.taskRepository.find({
-      where: { user, status },
+      where: { user: { id: user.id }, status },
       relations: ['user', 'user.tasks'],
     });
     return tasks.map((task) => this.taskMapper.toResponse(task));

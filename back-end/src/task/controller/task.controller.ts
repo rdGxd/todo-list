@@ -35,7 +35,7 @@ import { TaskService } from '../service/task.service';
 @ApiTags('Tasks')
 @ApiBearerAuth('access-token')
 @UseGuards(AuthAndPolicyGuard) // Aplica autenticação e autorização a todas as rotas
-@SetRoutePolicy(Roles.USER || Roles.ADMIN) // Define políticas de acesso globais
+@SetRoutePolicy(Roles.USER, Roles.ADMIN) // Define políticas de acesso globais
 @Controller('task')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}

@@ -1,4 +1,4 @@
-import { RegisterForm } from "@/forms/create";
+import { RegisterForm } from "@/forms/create-user";
 
 export function UserRegister() {
   return (

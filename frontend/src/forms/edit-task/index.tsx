@@ -7,36 +7,43 @@ import { TaskValidationData, taskValidationSchema } from "@/lib/validations/task
 import { TaskServiceClient } from "@/services/task/client";
 import { TasksType } from "@/types/tasks";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
-interface CreateTaskFormProps {
-  readonly onTaskCreated?: (newTask: TasksType) => void;
+interface EditTaskFormProps {
+  readonly task: TasksType;
+  readonly onTaskUpdated: (updatedTask: TasksType) => void;
+  readonly onCancel: () => void;
 }
 
-export function CreateTaskForm({ onTaskCreated }: CreateTaskFormProps) {
+export function EditTaskForm({ task, onTaskUpdated, onCancel }: EditTaskFormProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<TaskValidationData>({
     resolver: zodResolver(taskValidationSchema),
     defaultValues: {
-      title: "",
-      description: "",
+      title: task.title,
+      description: task.description,
     },
   });
+
+  // Atualiza os valores do formulário quando a task muda
+  useEffect(() => {
+    form.reset({
+      title: task.title,
+      description: task.description,
+    });
+  }, [task, form]);
 
   const onSubmit = async (formData: TaskValidationData) => {
     setIsLoading(true);
     try {
-      const response = await TaskServiceClient.create(formData);
-      toast.success("Tarefa criada com sucesso!");
-      form.reset();
-      if (onTaskCreated) {
-        onTaskCreated(response.data);
-      }
+      const response = await TaskServiceClient.update(task, formData);
+      toast.success("Tarefa atualizada com sucesso!");
+      onTaskUpdated(response.data);
     } catch {
-      toast.error("Erro ao criar tarefa. Tente novamente.");
+      toast.error("Erro ao atualizar tarefa. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -76,9 +83,20 @@ export function CreateTaskForm({ onTaskCreated }: CreateTaskFormProps) {
             )}
           />
 
-          <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>
-            Criar tarefa
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1 cursor-pointer"
+              onClick={onCancel}
+              disabled={isLoading}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" className="flex-1 cursor-pointer" disabled={isLoading}>
+              {isLoading ? "Atualizando..." : "Atualizar tarefa"}
+            </Button>
+          </div>
         </form>
       </FormProvider>
     </div>
