@@ -19,8 +19,8 @@ async function bootstrap() {
   // Configura o Swagger para documentação da API
   SwaggerConfig(app);
 
-  // Inicia o servidor na porta especificada nas variáveis de ambiente ou 3000 como padrão
-  await app.listen(process.env.PORT ?? 3000);
+  // Inicia o servidor na porta especificada nas variáveis de ambiente ou 3001 como padrão
+  await app.listen(process.env.APP_PORT ?? 3001);
 }
 
 // Executa a função bootstrap e ignora o retorno (void)

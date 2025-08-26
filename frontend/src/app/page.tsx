@@ -1,5 +1,5 @@
-import { UserRegister } from "@/pages/CreateAccountPage/index ";
-import { UserLogin } from "@/pages/LoginPage";
+import { UserLogin } from "@/pages/UserLogin";
+import { UserRegister } from "@/pages/UserRegister/index ";
 
 export default function Home() {
   return (

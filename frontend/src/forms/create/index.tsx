@@ -3,13 +3,14 @@
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { AccountCreateData, createValidationSchema } from "@/lib/validations/create-account";
+import { RegisterFormData, signupValidationSchema } from "@/lib/validations/create-account";
+import { UserService } from "@/services/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 export function RegisterForm() {
-  const form = useForm<AccountCreateData>({
-    resolver: zodResolver(createValidationSchema),
+  const form = useForm<RegisterFormData>({
+    resolver: zodResolver(signupValidationSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -17,9 +18,9 @@ export function RegisterForm() {
     },
   });
 
-  const onSubmit = (data: AccountCreateData) => {
+  const onSubmit = async (data: RegisterFormData) => {
     console.log(data);
-    // Aqui você pode adicionar a lógica de criação de conta
+    await UserService.register(data);
   };
 
   return (

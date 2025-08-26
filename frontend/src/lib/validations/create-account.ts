@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createValidationSchema = z.object({
+export const signupValidationSchema = z.object({
   name: z.string().min(3, {
     message: "Nome deve ter pelo menos 3 caracteres.",
   }),
@@ -10,4 +10,4 @@ export const createValidationSchema = z.object({
   }),
 });
 
-export type AccountCreateData = z.infer<typeof createValidationSchema>;
+export type RegisterFormData = z.infer<typeof signupValidationSchema>;
