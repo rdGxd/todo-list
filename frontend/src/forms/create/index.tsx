@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { RegisterFormData, signupValidationSchema } from "@/lib/validations/create-account";
-import { UserService } from "@/services/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -18,10 +17,7 @@ export function RegisterForm() {
     },
   });
 
-  const onSubmit = async (data: RegisterFormData) => {
-    console.log(data);
-    await UserService.register(data);
-  };
+  const onSubmit = async (data: RegisterFormData) => {};
 
   return (
     <div className="w-full max-w-sm flex flex-col text-center">

@@ -64,7 +64,6 @@ export class UsersController {
     description: 'Usuário criado com sucesso',
     type: ResponseUserDto,
   })
-  @ApiOperation({ summary: 'Criar usuário' })
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
@@ -98,7 +97,7 @@ export class UsersController {
    */
   @Get(':id')
   @UseGuards(AuthAndPolicyGuard)
-  @SetRoutePolicy(Roles.USER || Roles.ADMIN)
+  @SetRoutePolicy(Roles.USER, Roles.ADMIN)
   findOne(@Param('id') id: string, @TokenPayloadParam() payload: PayloadDto) {
     return this.usersService.findOne(id, payload);
   }

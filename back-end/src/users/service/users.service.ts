@@ -44,6 +44,7 @@ export class UsersService {
 
     // Aplica hash na senha antes de salvar
     user.password = await this.hashingService.hash(createUserDto.password);
+    user.tasks = [];
 
     // Cria e salva o usuário no banco
     this.usersRepository.create(user);

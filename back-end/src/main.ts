@@ -13,6 +13,10 @@ async function bootstrap() {
   // Cria uma instância da aplicação NestJS usando o módulo raiz (AppModule)
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors({
+    origin: '*',
+  });
+
   // Aplica pipes globais para validação automática de DTOs em todas as rotas
   app.useGlobalPipes(...GlobalPipesConfig());
 

@@ -1,11 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { loginValidationSchema, type LoginFormData } from "@/lib/validations/login";
+import { LoginFormData, loginValidationSchema } from "@/lib/validations/login";
+import { UserServiceClient } from "@/services/user/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 
 export function LoginForm() {
   const form = useForm<LoginFormData>({
@@ -16,15 +17,15 @@ export function LoginForm() {
     },
   });
 
-  const onSubmit = (data: LoginFormData) => {
-    console.log(data);
-    // Aqui você pode adicionar a lógica de login
+  const onSubmit = async (formData: LoginFormData) => {
+    const user = await UserServiceClient.login(formData);
+    console.log(user);
   };
 
   return (
     <div className="w-full max-w-sm flex flex-col text-center">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <FormProvider {...form}>
+        <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
           <FormField
             control={form.control}
             name="email"
@@ -57,7 +58,7 @@ export function LoginForm() {
             Entrar
           </Button>
         </form>
-      </Form>
+      </FormProvider>
     </div>
   );
 }

@@ -1,6 +1,5 @@
 // Importa decorators e utilitários necessários
 import { Injectable } from '@nestjs/common';
-import { plainToInstance } from 'class-transformer';
 
 // Importa mapper de tarefas para conversão aninhada
 import { TaskMapper } from 'src/task/mappers/mapper-taks';
@@ -49,6 +48,10 @@ export class UserMapper {
    * @returns User - Entidade pronta para ser salva no banco
    */
   toEntity(dto: CreateUserDto) {
-    return plainToInstance(User, dto);
+    const user = new User();
+    user.email = dto.email;
+    user.name = dto.name;
+    user.password = dto.password;
+    return user;
   }
 }
