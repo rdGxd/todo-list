@@ -7,7 +7,7 @@ import { RegisterFormData, signupValidationSchema } from "@/lib/validations/crea
 import { UserServiceClient } from "@/services/user/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 export function RegisterForm() {
@@ -38,7 +38,7 @@ export function RegisterForm() {
 
   return (
     <div className="w-full max-w-sm flex flex-col text-center">
-      <Form {...form}>
+      <FormProvider {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             disabled={isLoading}
@@ -89,7 +89,7 @@ export function RegisterForm() {
             Criar conta
           </Button>
         </form>
-      </Form>
+      </FormProvider>
     </div>
   );
 }

@@ -56,7 +56,7 @@ export class TaskService {
     }
 
     const tasks = await this.taskRepository.find({
-      where: { user },
+      where: { user: { id: user.id } },
       relations: ['user', 'user.tasks'],
     });
     return tasks.map((task) => this.taskMapper.toResponse(task));
