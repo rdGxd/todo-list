@@ -16,13 +16,13 @@ export const UserServiceClient = {
   },
 
   login: async (dataLogin: LoginFormData) => {
-    const { data } = await instance.post("/auth/login", dataLogin);
-    UserServiceClient.setTokens(data.accessToken, data.refreshToken);
-    return data;
+    const response = await instance.post("/auth/login", dataLogin);
+    UserServiceClient.setTokens(response.data.accessToken, response.data.refreshToken);
+    return response;
   },
 
   register: async (dataRegister: RegisterFormData) => {
-    const { data } = await instance.post("/users", dataRegister);
-    return data;
+    const response = await instance.post("/users", dataRegister);
+    return response;
   },
 };

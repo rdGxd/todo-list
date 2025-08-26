@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { RegisterFormData, signupValidationSchema } from "@/lib/validations/create-account";
+import { UserServiceClient } from "@/services/user/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 export function RegisterForm() {
   const form = useForm<RegisterFormData>({
@@ -17,7 +19,16 @@ export function RegisterForm() {
     },
   });
 
-  const onSubmit = async (data: RegisterFormData) => {};
+  const onSubmit = async (formData: RegisterFormData) => {
+    const response = await UserServiceClient.register(formData);
+    try {
+      if (response.status === 201) {
+        toast.success("Cadastro bem-sucedido!");
+      }
+    } catch {
+      toast.error("Erro ao fazer cadastro. Tente novamente.");
+    }
+  };
 
   return (
     <div className="w-full max-w-sm flex flex-col text-center">

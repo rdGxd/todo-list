@@ -7,6 +7,7 @@ import { LoginFormData, loginValidationSchema } from "@/lib/validations/login";
 import { UserServiceClient } from "@/services/user/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 export function LoginForm() {
   const form = useForm<LoginFormData>({
@@ -18,8 +19,14 @@ export function LoginForm() {
   });
 
   const onSubmit = async (formData: LoginFormData) => {
-    const user = await UserServiceClient.login(formData);
-    console.log(user);
+    const response = await UserServiceClient.login(formData);
+    try {
+      if (response.status === 201) {
+        toast.success("Login bem-sucedido!");
+      }
+    } catch {
+      toast.error("Erro ao fazer login. Tente novamente.");
+    }
   };
 
   return (

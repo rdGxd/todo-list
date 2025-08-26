@@ -2,6 +2,7 @@ import { ModeToggle } from "@/components/themes/mode-toggle";
 import { ThemeProvider } from "@/components/themes/theme-provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ToastContainer } from "react-toastify";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,6 +29,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <ToastContainer />
           {/* Theme Toggle - Fixed in top right corner */}
           <div className="fixed top-4 right-4 z-10">
             <ModeToggle />
