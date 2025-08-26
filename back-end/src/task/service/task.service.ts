@@ -130,15 +130,14 @@ export class TaskService {
     }
 
     const task = await this.taskRepository.findOne({
-      where: { id, user },
+      where: { id, user: { id: user.id } },
       relations: ['user', 'user.tasks'],
     });
     if (!task) {
       throw new Error('Task not found');
     }
 
-    await this.taskRepository.remove(task);
-    return this.taskMapper.toResponse(task);
+    return await this.taskRepository.remove(task);
   }
 
   /**

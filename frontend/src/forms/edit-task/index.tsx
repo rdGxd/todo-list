@@ -3,6 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { TaskValidationData, taskValidationSchema } from "@/lib/validations/task";
 import { TaskServiceClient } from "@/services/task/client";
 import { TasksType } from "@/types/tasks";
@@ -25,6 +27,7 @@ export function EditTaskForm({ task, onTaskUpdated, onCancel }: EditTaskFormProp
     defaultValues: {
       title: task.title,
       description: task.description,
+      status: task.status,
     },
   });
 
@@ -33,6 +36,7 @@ export function EditTaskForm({ task, onTaskUpdated, onCancel }: EditTaskFormProp
     form.reset({
       title: task.title,
       description: task.description,
+      status: task.status,
     });
   }, [task, form]);
 
@@ -77,6 +81,34 @@ export function EditTaskForm({ task, onTaskUpdated, onCancel }: EditTaskFormProp
                 <FormLabel className="mb-2">Descrição</FormLabel>
                 <FormControl>
                   <Input placeholder="Digite a descrição da tarefa" type="text" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            disabled={isLoading}
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="mb-2">Status da tarefa</FormLabel>
+                <FormControl>
+                  <RadioGroup onValueChange={field.onChange} value={field.value} className="flex flex-col space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="PENDING" id="pending" />
+                      <Label htmlFor="pending">Pendente</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="IN_PROGRESS" id="in-progress" />
+                      <Label htmlFor="in-progress">Em andamento</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="COMPLETED" id="completed" />
+                      <Label htmlFor="completed">Concluída</Label>
+                    </div>
+                  </RadioGroup>
                 </FormControl>
                 <FormMessage />
               </FormItem>

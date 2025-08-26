@@ -6,6 +6,7 @@ import { CreateTaskForm } from "@/forms/new-task";
 import { TaskServiceClient } from "@/services/task/client";
 import { TasksType } from "@/types/tasks";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 export default function TasksInitialPage() {
   const [tasks, setTasks] = useState<TasksType[]>([]);
@@ -15,7 +16,6 @@ export default function TasksInitialPage() {
     const fetchTasks = async () => {
       const getTasks = await TaskServiceClient.getAll();
       setTasks(getTasks.data);
-      console.log(getTasks.data);
     };
     fetchTasks();
   }, []);
@@ -35,6 +35,24 @@ export default function TasksInitialPage() {
 
   const handleEditTask = (task: TasksType) => {
     setEditingTask(task);
+  };
+
+  const handleDeleteTask = async (task: TasksType) => {
+    if (confirm("Tem certeza que deseja remover a tarefa?")) {
+      try {
+        await TaskServiceClient.remove(task);
+        // Atualiza a lista removendo a task deletada
+        setTasks((prevTasks) => prevTasks.filter((t) => t.taskId !== task.taskId));
+        // Se a task sendo editada foi deletada, cancela a edição
+        if (editingTask?.taskId === task.taskId) {
+          setEditingTask(null);
+        }
+        toast.success("Tarefa removida com sucesso!");
+      } catch (error) {
+        console.error("Erro ao deletar task:", error);
+        toast.error("Erro ao deletar a tarefa. Tente novamente.");
+      }
+    }
   };
 
   const getStatusColor = (status: TasksType["status"]) => {
@@ -78,8 +96,21 @@ export default function TasksInitialPage() {
                 <li key={task.taskId} className="bg-white text-gray-800 p-4 rounded shadow">
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="font-semibold flex-1">{task.title}</h3>
-                    <Button variant="outline" size="sm" onClick={() => handleEditTask(task)} className="ml-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEditTask(task)}
+                      className="ml-2 cursor-pointer bg-blue-500 border-blue-500 hover:bg-blue-600 hover:border-blue-600"
+                    >
                       Editar
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteTask(task)}
+                      className="ml-2 bg-red-500 border-red-500  hover:bg-red-600 hover:border-red-600 cursor-pointer "
+                    >
+                      Apagar
                     </Button>
                   </div>
                   {task.description && <p className="text-sm text-gray-600 mt-1">{task.description}</p>}

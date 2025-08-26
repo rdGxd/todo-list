@@ -17,7 +17,7 @@ export const TaskServiceClient = {
 
   update: async (task: TasksType, dataTask: TaskValidationData) => {
     const { accessToken } = UserServiceClient.getTokens();
-    const response = await instance.patch(`/task/${task.taskId}`, dataTask,{
+    const response = await instance.patch(`/task/${task.taskId}`, dataTask, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -28,6 +28,16 @@ export const TaskServiceClient = {
   getAll: async () => {
     const { accessToken } = UserServiceClient.getTokens();
     const response = await instance.get("/task", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response;
+  },
+
+  remove: async (task: TasksType) => {
+    const { accessToken } = UserServiceClient.getTokens();
+    const response = await instance.delete(`/task/${task.taskId}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
